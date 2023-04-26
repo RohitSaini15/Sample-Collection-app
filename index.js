@@ -1,5 +1,6 @@
 const express = require("express")
 const app = express()
+
 require("dotenv").config()
 
 const mongoose = require("./config/mongoose")
@@ -7,6 +8,9 @@ const passport = require("./config/passport-local-strategy")
 const session = require("express-session")
 
 const port = 8000
+
+app.set('view engine','ejs')
+app.set('views',"./views")
 
 // convert the encoded data from browser into javascript object and attach in req.body
 app.use(express.urlencoded())
@@ -24,6 +28,8 @@ app.use(session({
 
 app.use(passport.initialize())
 app.use(passport.session())
+
+app.use(passport.setAuthenticatedUser)
 
 // all the routes with / will handled by this folder
 app.use("/",require("./routes"))
