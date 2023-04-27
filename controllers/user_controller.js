@@ -1,14 +1,19 @@
 const User = require("../models/user")
 const genPassword = require("../lib/passwordUtils").genPassword
 const sendVerifyEmail = require("../mailer/verify_email").sendVerifyEmail
+const sendResetEmail = require("../mailer/password_reset").sendResetEmail
 const VerifyEmail = require("../models/verify_email")
+const PasswordReset = require("../models/password_reset")
 
 module.exports.createUser = async (req,res) => {
     try{
         if(req.body.password != req.body.confirm_password) return res.status(200).json({msg: "password doesn't match"})
-        let user = await User.find({"email": req.body.email})
+        let user = await User.findOne({"email": req.body.email})
 
-        if(user.length != 0) return res.status(200).json({msg: "email already exists"})
+        if(user){
+            if(user.verified) return res.status(200).json({msg: "email already exists"})
+            await User.findByIdAndDelete(user.id)
+        }
 
         const saltHash = genPassword(req.body.password)
 
@@ -16,7 +21,7 @@ module.exports.createUser = async (req,res) => {
             "email": req.body.email,
             "password_hash": saltHash.password_hash,
             "salt": saltHash.salt,
-            "admin": true,
+            "admin": false,
             "name": req.body.name,
             "department": req.body.department,
             "verified": false
@@ -45,5 +50,44 @@ module.exports.verifyEmail = async (req,res) => {
     } catch(err){
         console.log(`error occured in verifying Email in user_controller ${err}`)
         return res.status(401).json({msg: "error occured in verifying email"})
+    }
+}
+
+// email will be provided in this route and generate token
+module.exports.sendMailPasswordReset = async (req,res) => {
+    try{
+        let user = await User.findOne({"email":req.body.email})
+        if(user && user.verified){
+            await PasswordReset.findOneAndDelete({user:user.id})
+            await sendResetEmail(user)
+            return res.status(200).json({msg: "reset password mail successfully send"})
+        } 
+
+        return res.status(401).json({msg: "email could not found"})
+    } catch(err){
+        console.log(`error occured in sendMailPasswordReset in user_controller ${err}`)
+        return res.status(401).json({msg: "error occured in verifying email"})
+    }
+}
+
+// get and post request for showing page for password and confirm password
+module.exports.passwordReset = async (req,res) => {
+    if (req.method == 'GET') return res.render('password_reset')
+
+    try{
+        if(req.body.password != req.body.confirm_password) return res.status(200).json({msg: "password not matched"})
+        let token = await PasswordReset.findOne({accessToken: req.query.accessToken})
+
+        if(token && token.isValid){
+            const saltHash = genPassword(req.body.password)
+            await User.findByIdAndUpdate(token.user,{"password_hash": saltHash.password_hash,"salt": saltHash.salt}) 
+            await PasswordReset.findByIdAndUpdate(token.id,{isValid: false})
+            return res.status(200).json({msg: "password successfully changed"})
+        }
+
+        return res.status(401).json({msg: "token could not found or either expired"})
+    } catch(err){
+        console.log(`error occured in PasswordReset in user_controller ${err}`)
+        return res.status(401).json({msg: "error occured in password reset"})
     }
 }

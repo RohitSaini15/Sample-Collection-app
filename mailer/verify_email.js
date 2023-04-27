@@ -12,7 +12,7 @@ module.exports.sendVerifyEmail = async (user) => {
     })
     await newVerifyEmail.save()
 
-    let renderHTMLString = await ejs.renderFile("./views/verify_email.ejs",{accessToken,"base_url":process.env.BASE_URL},{async: true})
+    let renderHTMLString = await ejs.renderFile("./views/mailers/verify_email.ejs",{accessToken,"base_url":process.env.BASE_URL},{async: true})
 
     await nodemailer.transporter.sendMail({
         'from': process.env.GMAIL_ID,

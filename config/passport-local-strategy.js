@@ -12,10 +12,11 @@ const verifyCallback = async (email,password,done) => {
     try{
         let user = await User.findOne({"email": email})
         
-        if(user.length == 0) return done(null,false)
+        if(!user) return done(null,false)
+        if (!user.verified) return done(null,false)
 
         const isValid = verifyPassword(password,user.password_hash,user.salt)
-        console.log(isValid)
+        
         if(!isValid) return done(null,false)
         
         return done(null,user)
