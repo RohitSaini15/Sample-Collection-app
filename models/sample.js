@@ -1,11 +1,15 @@
 const mongoose = require("mongoose")
 
 const sampleSchema = mongoose.Schema({
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'user'
+      },
     city: String,
     name_of_fso: String,
     sampling_location: String,
     eureka_sampler: String,
-    approved: Boolean,
+    approval_status: String,
     name_of_sample: String,
     outlet_name: String,
     batch_no: String,
