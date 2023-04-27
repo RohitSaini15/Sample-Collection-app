@@ -5,8 +5,6 @@ const passport = require("../config/passport-local-strategy")
 
 router.post("/create",user_controller.createUser)
 router.post("/createSession",passport.authenticate("local"),user_controller.createSession)
-router.get("/",passport.isAuth,(req,res)=>{
-    return res.status(200).json({msg: "succesfully entered in auth area"})
-})
+router.get("/verify",user_controller.verifyEmail)
 
 module.exports = router

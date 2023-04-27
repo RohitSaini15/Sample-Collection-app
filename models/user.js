@@ -25,6 +25,10 @@ userSchema=mongoose.Schema({
     admin: {
         type: Boolean,
         required: true
+    },
+    verified: {
+        type: Boolean,
+        required: true
     }
 },{
     timestamps: true

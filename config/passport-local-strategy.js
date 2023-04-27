@@ -11,7 +11,7 @@ const customFields = {
 const verifyCallback = async (email,password,done) => {
     try{
         let user = await User.findOne({"email": email})
-        console.log(user)
+        
         if(user.length == 0) return done(null,false)
 
         const isValid = verifyPassword(password,user.password_hash,user.salt)
@@ -54,6 +54,13 @@ passport.isAdmin = (req,res,next) => {
     }
 
     return res.status(401).json({msg: "You are not a admin user"})
+}
+
+passport.setAuthenticatedUser = (req,res,next) => {
+    if(req.isAuthenticated()){
+        res.locals.user = req.user
+    }
+    next()
 }
 
 module.exports = passport
