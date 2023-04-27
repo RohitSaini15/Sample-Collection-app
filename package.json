@@ -1,7 +1,7 @@
 {
   "name": "sample-collection-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "Steps after cloning the module.\r 1) run the command \"npm init\" to install all the required modules.\r 2) start the server using \"npm start\" command",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -25,5 +25,8 @@
     "nodemon": "^2.0.22",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0"
+  },
+  "directories": {
+    "lib": "lib"
   }
 }

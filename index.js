@@ -9,7 +9,7 @@ const session = require("express-session")
 const port = 8000
 
 // convert the encoded data from browser into javascript object and attach in req.body
-app.use(express.urlencoded())
+app.use(express.urlencoded({extended:true}))
 
 // generate a session for a user and store it in a server side and attach session id to cookie 
 app.use(session({
