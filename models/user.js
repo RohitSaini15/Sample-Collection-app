@@ -29,6 +29,11 @@ userSchema=mongoose.Schema({
     verified: {
         type: Boolean,
         required: true
+    },
+    type: {
+        type: String,
+        required: true,
+        enum: ['ADMIN', 'FSO', 'FI']
     }
 },{
     timestamps: true

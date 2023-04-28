@@ -24,7 +24,8 @@ module.exports.createUser = async (req,res) => {
             "admin": false,
             "name": req.body.name,
             "department": req.body.department,
-            "verified": false
+            "verified": false,
+            "type": req.body.type
         })
         await newUser.save()
         await sendVerifyEmail(newUser)

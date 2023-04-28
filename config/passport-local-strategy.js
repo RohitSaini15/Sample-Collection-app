@@ -50,11 +50,18 @@ passport.isAuth = (req,res,next) => {
 }
 
 passport.isAdmin = (req,res,next) => {
-    if(req.isAuthenticated && req.user.admin){
+    if(req.isAuthenticated() && req.user.admin){
         return next()
     }
 
     return res.status(401).json({msg: "You are not a admin user"})
+}
+
+passport.isFSO = (req,res,next) => {
+    if(req.isAuthenticated() && req.user.type == "FSO"){
+        return next()
+    }
+    return res.status(401).json({msg: "You are not FSO"})
 }
 
 passport.setAuthenticatedUser = (req,res,next) => {
