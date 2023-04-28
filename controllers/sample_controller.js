@@ -47,13 +47,60 @@ try {
         sample_image:s3SampleUrl,
         location_image :s3LocationeUrl
     };
-    
-    sample = await Sample.findByIdAndUpdate(req.params.id, { $set: newSample },{new:true});
+
+    sample = await Sample.findByIdAndUpdate(
+      req.query.id,
+      { $set: newSample },
+      { new: true }
+    );
     return res.json(sample);
-} catch (err) {
+  } catch (err) {
     console.log(`error occured in sample_controller samplingSurvey ${err}`);
-    return res.status(401).json({msg: "error occured in Scheduling a sample"});
-}
+    return res
+      .status(401)
+      .json({ msg: "error occured in Scheduling a sample" });
+  }
+};
+
+module.exports.getAllSamples = async (req, res) => {
+  try {
+    const samples = await Sample.find({ user: req.body.user });
+    console.log(req.body.user);
+    res.status(200).send(samples);
+  } catch (error) {
+    console.log(`error occured in sample_controller approvedSamples ${err}`);
+    return res
+      .status(401)
+      .json({ msg: "error occured in fteching approved samples" });
+  }
+};
+
+module.exports.changeApprovleStatus = async (req, res) => {
+  try {
+    let sample = await Sample.findByIdAndUpdate(req.params.id, {
+      approval_status: req.body.approval_status,
+    });
+    sample = await Sample.findById(req.query.id);
+    res.send(sample);
+  } catch (error) {
+    console.log(`error occured in sample_controller changeApprovle ${err}`);
+    return res
+      .status(401)
+      .json({ msg: "error occured in change approvle status of sample" });
+  }
+};
+
+
+module.exports.getSampleFromCity=async(req,res)=>{
+  try {
+    const samples = await Sample.find({name_of_fso:req.query.name,city:req.query.city});
+    res.send(samples);
+  } catch (err) {
+    console.log(`error occured in sample_controller getSampleFromCity ${err}`);
+    return res
+      .status(401)
+      .json({ msg: "error occured in fteching samples from a city for fso" });
+  }
 }
 
 module.exports.getAllSamples=async(req,res)=>{
@@ -75,5 +122,14 @@ module.exports.changeApprovalStatus = async(req,res)=>{
         console.log(`error occured in sample_controller changeApprovle ${err}`);
         return res.status(401).json({msg: "error occured in change approvle status of sample"});
     }
+}
    
+module.exports.getSampleFso =async (req,res) => {
+  try {
+    const samples = await Sample.find({name_of_fso:req.query.name});
+    res.send(samples);
+  } catch (err) {
+    console.log(`error occured in sample_controller getSampleFso ${err}`);
+    return res.status(401).json({ msg: "error occured in fteching samples for a fso by name" });
+  }
 }

@@ -9,5 +9,5 @@ router.get("/verify",user_controller.verifyEmail)
 router.post("/send_mail/password_reset",user_controller.sendMailPasswordReset)
 router.get("/password_reset",user_controller.passwordReset)
 router.post("/password_reset",user_controller.passwordReset)
-
+router.get("/create",user_controller.createUserByAdmin)
 module.exports = router
