@@ -91,3 +91,7 @@ module.exports.passwordReset = async (req,res) => {
         return res.status(401).json({msg: "error occured in password reset"})
     }
 }
+
+module.exports.createUserByAdmin =async(req,res)=>{
+      return res.render('create_user')
+}
