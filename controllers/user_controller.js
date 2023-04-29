@@ -11,7 +11,7 @@ module.exports.createUser = async (req,res) => {
         let user = await User.findOne({"email": req.body.email})
 
         if(user){
-            if(user.verified) return res.status(200).json({msg: "email already exists"})
+            if(user.verified) return res.status(200).json({msg: "email already exists",status:"ERROR"})
             await User.findByIdAndDelete(user.id)
         }
 
@@ -21,7 +21,7 @@ module.exports.createUser = async (req,res) => {
             "email": req.body.email,
             "password_hash": saltHash.password_hash,
             "salt": saltHash.salt,
-            "admin": false,
+            "admin": req.body.admin || false,
             "name": req.body.name,
             "department": req.body.department,
             "verified": false,
@@ -29,15 +29,15 @@ module.exports.createUser = async (req,res) => {
         })
         await newUser.save()
         await sendVerifyEmail(newUser)
-        return res.status(200).json({msg: "User is successfully created"})
+        return res.status(200).json({msg: "User is successfully created",status:"SUCCESS"})
     } catch(err){
         console.log(`error occured in user_controller create session ${err}`)
-        return res.status(401).json({msg: "error occured in creating user"})
+        return res.status(401).json({msg: "error occured in creating user",status:"ERROR"})
     }
 }
 
 module.exports.createSession = (req,res) => {
-    return res.status(200).json({msg: "you are logged in"})
+    return res.status(200).json({msg: "you are logged in",status:"SUCCESS"})
 }
 
 module.exports.verifyEmail = async (req,res) => {
@@ -45,12 +45,12 @@ module.exports.verifyEmail = async (req,res) => {
         let doc = await VerifyEmail.find({accessToken: req.query.accessToken})
         if(doc.length){
             await User.findByIdAndUpdate(doc[0].user,{verified: true}) 
-            return res.status(200).json({msg:"email is verified"})
+            return res.status(200).json({msg:"email is verified",status:"SUCCESS"})
         }
-        return res.status(401).json({msg:"there is no record with this token"})
+        return res.status(401).json({msg:"there is no record with this token",status:'SUCCESS'})
     } catch(err){
         console.log(`error occured in verifying Email in user_controller ${err}`)
-        return res.status(401).json({msg: "error occured in verifying email"})
+        return res.status(401).json({msg: "error occured in verifying email",status:"ERROR"})
     }
 }
 
@@ -61,13 +61,13 @@ module.exports.sendMailPasswordReset = async (req,res) => {
         if(user && user.verified){
             await PasswordReset.findOneAndDelete({user:user.id})
             await sendResetEmail(user)
-            return res.status(200).json({msg: "reset password mail successfully send"})
+            return res.status(200).json({msg: "reset password mail successfully send",status:"SUCCESS"})
         } 
 
-        return res.status(401).json({msg: "email could not found"})
+        return res.status(401).json({msg: "email could not found",status:"ERROR"})
     } catch(err){
         console.log(`error occured in sendMailPasswordReset in user_controller ${err}`)
-        return res.status(401).json({msg: "error occured in verifying email"})
+        return res.status(401).json({msg: "error occured in verifying email",status:"ERROR"})
     }
 }
 
@@ -76,7 +76,7 @@ module.exports.passwordReset = async (req,res) => {
     if (req.method == 'GET') return res.render('password_reset')
 
     try{
-        if(req.body.password != req.body.confirm_password) return res.status(200).json({msg: "password not matched"})
+        if(req.body.password != req.body.confirm_password) return res.status(200).json({msg: "password not matched",status:"ERROR"})
         let token = await PasswordReset.findOne({accessToken: req.query.accessToken})
 
         if(token && token.isValid){
@@ -86,10 +86,10 @@ module.exports.passwordReset = async (req,res) => {
             return res.status(200).json({msg: "password successfully changed"})
         }
 
-        return res.status(401).json({msg: "token could not found or either expired"})
+        return res.status(401).json({msg: "token could not found or either expired",status:"ERROR"})
     } catch(err){
         console.log(`error occured in PasswordReset in user_controller ${err}`)
-        return res.status(401).json({msg: "error occured in password reset"})
+        return res.status(401).json({msg: "error occured in password reset",status:"ERROR"})
     }
 }
 
