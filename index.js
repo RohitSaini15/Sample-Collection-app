@@ -7,7 +7,7 @@ const mongoose = require("./config/mongoose")
 const passport = require("./config/passport-local-strategy")
 const session = require("express-session")
 
-const port = 8000
+const port = process.env.PORT || 3000
 
 app.set('view engine','ejs')
 app.set('views',"./views")
