@@ -3,7 +3,8 @@ const app = express()
 
 require("dotenv").config()
 
-const mongoose = require("./config/mongoose")
+// const mongoose = require("./config/mongoose")
+const mongoose = require("mongoose")
 const passport = require("./config/passport-local-strategy")
 const session = require("express-session")
 
@@ -34,7 +35,6 @@ app.use(passport.setAuthenticatedUser)
 // all the routes with / will handled by this folder
 app.use("/",require("./routes"))
 
-module.exports = app
 // app.listen(port,(err)=>{
 //     if(err){
 //         console.log(`Error in running the server: ${err}`);
@@ -42,3 +42,23 @@ module.exports = app
 //     }
 //     console.log(`Server is running at port: ${port}`);
 // })
+
+const connectParams = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}
+async function main(){
+    var data = await mongoose.connect(process.env.DB_STRING)
+    return data
+}
+
+main().then(() => {
+    console.log("successfully connected mongo db")
+    app.listen(port,(err)=>{
+        if(err){
+            console.log(`Error in running the server: ${err}`);
+            return;
+        }
+        console.log(`Server is running at port: ${port}`);
+    })
+}).catch(err => console.log(err))
