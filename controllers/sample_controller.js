@@ -21,12 +21,31 @@ module.exports.scheduleASample = async (req, res) => {
       .json({ msg: "error occured in Scheduling a sample" });
   }
 };
+module.exports.scheduleASample = async(req,res)=>{
+    try {
+        const newSample = new Sample({
+            "user": req.user,
+            "city": req.body.city,
+            "name_of_fso": req.body.name_of_fso,
+            "sampling_location": req.body.sampling_location,
+            "eureka_sampler": req.body.eureka_sampler,
+            "approval_status": req.body.approval_status
+        })
+        await newSample.save()
+        res.status(200).json({msg: "sample scheduled successfully",status:"SUCCESS"})
+    } catch (err) {
+        console.log(`error occured in sample_controller scheduleASample ${err}`)
+        return res.status(401).json({msg: "error occured in Scheduling a sample",status:"ERROR"})
+    }
+}
 
 module.exports.samplingSurvey = async (req, res) => {
   try {
     let sample = await Sample.findById(req.params.id);
     if (!sample) {
       res.status(404).send("sample does not exist");
+    if(!sample){
+        res.status(404).json({msg:"sample does not exist",status:"ERROR"});
     }
 
     let s3SampleUrl = "";
@@ -58,12 +77,12 @@ module.exports.samplingSurvey = async (req, res) => {
       { $set: newSample },
       { new: true }
     );
-    return res.json(sample);
+    return res.json({sample,status:"SUCCESS"});
   } catch (err) {
     console.log(`error occured in sample_controller samplingSurvey ${err}`);
     return res
       .status(401)
-      .json({ msg: "error occured in Scheduling a sample" });
+      .json({ msg: "error occured in Scheduling a sample" ,status:"ERROR"});
   }
 };
 
@@ -71,6 +90,8 @@ module.exports.getAllSamples = async (req, res) => {
   try {
     const samples = await Sample.find({ user: req.body.user });
     res.status(200).send(samples);
+    console.log(req.body.user);
+    res.status(200).json({samples,status:"SUCCESS"});
   } catch (error) {
     console.log(`error occured in sample_controller approvedSamples ${err}`);
     return res
@@ -95,21 +116,26 @@ module.exports.changeApprovleStatus = async (req, res) => {
     return res
       .status(401)
       .json({ msg: "error occured in change approvle status of sample" });
+      .json({ msg: "error occured in fteching approved samples",status:"ERROR" });
   }
 };
 
 module.exports.getSampleFromCity = async (req, res) => {
+
+module.exports.getSampleFromCity=async(req,res)=>{
   try {
     const samples = await Sample.find({
       name_of_fso: req.query.name,
       city: req.query.city,
     });
     res.send(samples);
+    const samples = await Sample.find({name_of_fso:req.query.name,city:req.query.city});
+    res.send({samples,status:"SUCCESS"});
   } catch (err) {
     console.log(`error occured in sample_controller getSampleFromCity ${err}`);
     return res
       .status(401)
-      .json({ msg: "error occured in fteching samples from a city for fso" });
+      .json({ msg: "error occured in fteching samples from a city for fso" ,status:"ERROR"});
   }
 };
 
@@ -126,9 +152,33 @@ module.exports.getAllSamples = async (req, res) => {
 };
 
 module.exports.getSampleFso = async (req, res) => {
+module.exports.getAllSamples=async(req,res)=>{
+    try {
+        const samples =await Sample.find({});
+        res.status(200).send({samples,success: "SUCCESS"});
+    } catch (error) {
+        console.log(`error occured in sample_controller approvedSamples ${err}`);
+        return res.status(401).json({msg: "error occured in fteching approved samples",status:"ERROR"});
+    }
+}
+
+module.exports.changeApprovalStatus = async(req,res)=>{
+    try {
+        let sample = await Sample.findByIdAndUpdate(req.params.id,{approval_status:req.body.approval_status});
+        sample = await Sample.findById(req.params.id)
+        res.json({sample,status:"SUCCESS"})
+    } catch (error) {
+        console.log(`error occured in sample_controller changeApprovle ${err}`);
+        return res.status(401).json({msg: "error occured in change approvle status of sample",status:"ERROR"});
+    }
+}
+   
+module.exports.getSampleFso =async (req,res) => {
   try {
     const samples = await Sample.find({ name_of_fso: req.query.name });
     res.send(samples);
+    const samples = await Sample.find({name_of_fso:req.query.name});
+    res.send({samples,status:"SUCCESS"});
   } catch (err) {
     console.log(`error occured in sample_controller getSampleFso ${err}`);
     return res
@@ -176,6 +226,7 @@ module.exports.dataForPdf = async (req, res) => {
   let signature = await Signature.find({sample:req.params.id});
   if (!signature) {
     res.send("signature does not exists");
+    return res.status(401).json({ msg: "error occured in fteching samples for a fso by name" ,status:"ERROR"});
   }
   let result = {
     city: sample.city,
