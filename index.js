@@ -34,12 +34,11 @@ app.use(passport.setAuthenticatedUser)
 // all the routes with / will handled by this folder
 app.use("/",require("./routes"))
 
-module.exports = app;
 
-// app.listen(port,(err)=>{
-//     if(err){
-//         console.log(`Error in running the server: ${err}`);
-//         return;
-//     }
-//     console.log(`Server is running at port: ${port}`);
-// })
+app.listen(port,(err)=>{
+    if(err){
+        console.log(`Error in running the server: ${err}`);
+        return;
+    }
+    console.log(`Server is running at port: ${port}`);
+})
